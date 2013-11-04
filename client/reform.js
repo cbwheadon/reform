@@ -59,7 +59,7 @@ drawBarChart = function(div, data){
 	.attr("width", x.rangeBand())
 	.attr("y", function(d) { return y(d.freq); })
 	.attr("height", function(d) { return height - y(d.freq); })
-	.style("fill", function(d) {return color(d3.bisectLeft(cumBnds,d.freq))});
+	.style("fill", function(d) {return color(d3.bisectLeft(cumBnds.sort(),d.freq))});
 
     function type(d) {
 	d.freq = +d.freq;
@@ -135,23 +135,47 @@ Template.example.rendered = function(){
     }
 }
 
-Template.hello.greeting = function () {
-    return "Welcome to reform.";
+Template.control.passing = function () {
+    return formatPercent(Session.get('pass'));
 };
 
-Template.hello.events({
-    'click input' : function () {
+Template.control.events({
+    'click #regen' : function () {
 	// template data, if any, is available in 'this'
 	if (typeof console !== 'undefined'){
 	    regen(Session.get('n'),Session.get('ni'));
+	    redraw();
+	}
+    },
+    'click #harder': function () {
+	console.log('harder');
+	var ps = Session.get('pass');
+	if (ps<0.9){
+	    Session.set('pass', ps+0.05);	    
+	    cumBnds = genGrades(ps);
+	    console.log(cumBnds);
+	    redraw();
+	}
+    },
+    'click #easier': function () {
+	console.log('harder');
+	var ps = Session.get('pass');
+	if (ps>0.1){
+	    Session.set('pass', ps-0.05);	    
+	    cumBnds = genGrades(ps);
+	    console.log(cumBnds);
+	    redraw();
 	}
     }
+    
 });
+
+
+var formatPercent = d3.format(".0%");
 
 function regen(n,i){
     scores = genScores(n,i)
     freq = genSet(scores,0,i)
-    redraw();
 }
 
 function redraw() {
@@ -161,13 +185,26 @@ function redraw() {
 	.duration(1000)
 	.attr("y", function(d) { return y(d.freq); })
 	.attr("height", function(d) { return height - y(d.freq); })
-    	.style("fill", function(d) {return color(d3.bisectLeft(cumBnds,d.freq))});
+    	.style("fill", function(d) {return color(d3.bisectLeft(cumBnds.sort(),d.freq))});
+}
+
+function genGrades(ps){
+    var inc = (1 - ps)/9;
+    var cumBnds = [1,1-ps];
+    
+    for (var i=2; i<11; i++){
+	var stp = cumBnds[i-1]-inc;
+	stp = Math.round(stp * 10000) / 10000;
+	cumBnds.push(stp);
+    }
+    return cumBnds;
 }
 
 Meteor.startup(function () {
     Session.set('n',1000);
     Session.set('ni',50);
-    cumBnds = [0,.1,.2,.3,.4,.5,.6,.7,.8,.9,1];
-    //Meteor.setInterval(regen(Session.get('n')), 1000);
+    Session.set('pass',0.1);
+    cumBnds = genGrades(Session.get('pass'));
+    console.log(cumBnds);
 });
 

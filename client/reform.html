@@ -3,14 +3,18 @@
 </head>
 
 <body>
-  {{> hello}}
+  {{> control}}
   {{> example}}
 </body>
 
-<template name="hello">
-  <h1>Click the button to regenerate the test scores.</h1>
-  <h2>Every colour represents a different grade.</h2>
-  <input type="button" value="Regenerate" />
+<template name="control">
+  <h1>Performance 8</h1>
+  <div>Percentage passing: {{passing}}</div>
+  <BR>
+  <input type="button" value="Regenerate" id="regen"/>
+  <input type="button" value="Harder" id="harder"/>
+  <input type="button" value="Easier" id="easier"/>
+  <BR>
 </template>
 
 <template name="example">
