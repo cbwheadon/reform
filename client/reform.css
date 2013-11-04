@@ -8,7 +8,6 @@ body {
 h1 {
     font-family: 'Open Sans', sans-serif;
     font-weight: 400
-    
 }
 
 h2 {
@@ -30,4 +29,6 @@ h2 {
 .x.axis path {
   display: none;
 }
+
+
 

@@ -5,13 +5,15 @@
 <body>
   {{> control}}
   {{> example}}
+  {{> vadded}}
 </body>
 
 <template name="control">
   <h1>Performance 8</h1>
-  <div>Percentage passing: {{passing}}</div>
+  <div>Cumulative percentage achieving a grade 9: {{passing}}</div>
+  <div>False positives: {{fp}}</div>
   <BR>
-  <input type="button" value="Regenerate" id="regen"/>
+  <input type="button" value="Stop" id="regen"/>
   <input type="button" value="Harder" id="harder"/>
   <input type="button" value="Easier" id="easier"/>
   <BR>
@@ -19,4 +21,8 @@
 
 <template name="example">
   <div id="example"></id>
+</template>
+
+<template name="vadded">
+  <div id="vadded"></id>
 </template>
