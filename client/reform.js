@@ -119,7 +119,7 @@ drawBarChart = function(div, data){
 	.attr("x", function(d) { return x(d.score); })
 	.attr("width", x.rangeBand())
 	.attr("y", function(d) { return y(d.freq); })
-	.attr("height", function(d) { return height - y(d.freq) > 0 ? height - y(d.freq) : 0 ; })
+    	.attr("height", function(d) { return height - y(d.freq); })
 	.style("fill", function(d) {return color(d3.bisectLeft(cumBnds.sort(),d.freq))});
 
     function type(d) {
@@ -142,7 +142,8 @@ genSet = function(ar,mn,mx){
     var cums = [tmp.toFixed(3)];
     for(var i=0; i < obj.length; i++){
 	var tmp = cums[i]-(obj[i]/n);
-	cums.push(Math.round(tmp*1000)/1000);
+	if(tmp<0){tmp=0.0};
+	cums.push(tmp);
     }
     var scores = [];
     for (var i=mn; i < mx+1; i++){
@@ -166,8 +167,9 @@ simScores = function(persons,items){
     for (i=0; i<persons.length; i++){
 	scores.push(0);
 	for (j=0; j<items.length; j++){
-	    abi = persons[i] + (5 - Math.random()*10)
-	    var p = raschP(abi,items[j])
+	    var abi = persons[i] + (5 - Math.random()*10)
+	    var beta = items[j] - 1
+	    var p = raschP(abi,beta)
 	    var c = correct(p)
 	    scores[i]+=c;
 	}
@@ -226,7 +228,7 @@ Template.control.passing = function () {
 };
 
 Template.control.fp = function () {
-    return formatPercent(Session.get('fp')/Session.get('sims'));
+    return formatPercent2(Session.get('fp')/Session.get('sims'));
 };
 
 Template.control.events({
@@ -276,6 +278,7 @@ Template.control.events({
 
 
 var formatPercent = d3.format(".0%");
+var formatPercent2 = d3.format(".2%");
 
 function grade(){
     //Draw new grade boundaries
@@ -314,10 +317,11 @@ function valueAdded(){
 function redraw() {
     svg.selectAll(".bar")
 	.data(freq)
+	.filter(function(d) {return ((Math.abs(this.height.baseVal.value-(height - y(d.freq))))>1)})
 	.transition()
 	.duration(1000)
 	.attr("y", function(d) { return y(d.freq); })
-	.attr("height", function(d) { return height - y(d.freq) ; })
+    	.attr("height", function(d) { return height - y(d.freq) })
     	.style("fill", function(d) {return color(d3.bisectLeft(cumBnds.sort(),d.freq))});
 
     psvg.selectAll(".point")
@@ -327,7 +331,12 @@ function redraw() {
 	.attr("cy", function(d) { return py(d); })
 	.style("fill", function(d) {return d< -0.5 ? "red" : "steelblue"});
 
+    function calcH(fre){
+	    return Math.round((height - y(fre))*100)/100;
+    }
+
 }
+
 
 function genGrades(ps){
     var inc = (1 - ps)/9;
@@ -370,7 +379,7 @@ resetRedraw = function(){
 Meteor.startup(function () {
     //Meteor.setInterval(reset,1000);
     Session.set("n",1000);
-    Session.set("ni",50);
+    Session.set("ni",60);
     Session.set("fp",0);
     Session.set("sims",0);
     Session.set("pass",0.1);
